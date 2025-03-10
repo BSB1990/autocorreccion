@@ -1,0 +1,186 @@
+<div class="container">
+    <h1>Actividades de Autoevaluación</h1>
+    <div id="quiz"></div>
+    <button id="submit">Enviar respuestas</button>
+    <div id="results"></div>
+</div>
+
+<script>
+    const quizContainer = document.getElementById('quiz');
+    const resultsContainer = document.getElementById('results');
+    const submitButton = document.getElementById('submit');
+
+    const myQuestions = [{
+            question: "¿Qué artículo regula el Decreto-Ley en la Constitución española?",
+            answers: {
+                a: "82",
+                b: "85",
+                c: "86"
+            },
+            correctAnswer: "c"
+        },
+        {
+            question: "¿Cuál de las siguientes materias no está reservada a la Ley Orgánica?",
+            answers: {
+                a: "el régimen electoral general",
+                b: "el desarrollo de todos los derechos y libertades del Título I",
+                c: "la aprobación de Estatutos de Autonomía"
+            },
+            correctAnswer: "b"
+        }
+    ];
+
+    function buildQuiz() {
+        const output = [];
+
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answers = [];
+
+            for (letter in currentQuestion.answers) {
+                answers.push(
+                    `<label>
+                            <input type="radio" name="question${questionNumber}" value="${letter}">
+                            ${letter}: ${currentQuestion.answers[letter]}
+                        </label>`
+                );
+            }
+
+            output.push(
+                `<div class="question"> ${currentQuestion.question} </div>
+                    <div class="answers"> ${answers.join('')} </div>`
+            );
+        });
+
+        quizContainer.innerHTML = output.join('');
+    }
+
+    function showResults() {
+        const answerContainers = quizContainer.querySelectorAll('.answers');
+        let numCorrect = 0;
+
+        myQuestions.forEach((currentQuestion, questionNumber) => {
+            const answerContainer = answerContainers[questionNumber];
+            const selector = `input[name=question${questionNumber}]:checked`;
+            const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+            if (userAnswer === currentQuestion.correctAnswer) {
+                numCorrect++;
+                answerContainers[questionNumber].style.color = 'lightgreen';
+            } else {
+                answerContainers[questionNumber].style.color = 'red';
+            }
+        });
+
+        resultsContainer.innerHTML = `${numCorrect} respuesta(s) correcta(s) de ${myQuestions.length}`;
+    }
+
+    buildQuiz();
+
+    submitButton.addEventListener('click', showResults);
+</script>
+
+
+<p dir="ltr" style="text-align: left;"><br></p>
+
+<div class="container">
+    <div class="question">La <input type="text" id="input1"> viene regulada en el Título II de la Constitución, mientras que el Poder Judicial viene regulado en el Título <input type="text" id="input2">.</div>
+    <button class="btn" onclick="checkAnswers()">Verificar</button>
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+    function checkAnswers() {
+        var input1 = document.getElementById('input1').value.trim().toLowerCase();
+        var input2 = document.getElementById('input2').value.trim().toLowerCase();
+        var result = document.getElementById('result');
+        var correct1 = input1 === 'corona';
+        var correct2 = input2 === 'vi';
+
+        document.getElementById('input1').style.color = correct1 ? 'green' : 'red';
+        document.getElementById('input2').style.color = correct2 ? 'green' : 'red';
+
+        if (correct1 && correct2) {
+            result.textContent = '¡Correcto! Las respuestas son correctas.';
+            result.style.color = 'green';
+        } else {
+            result.textContent = 'Incorrecto. Revisa las respuestas marcadas en rojo.';
+            result.style.color = 'red';
+        }
+    }
+</script>
+
+
+
+<p dir="ltr" style="text-align: left;"><br></p>
+
+
+<div class="container">
+    <div class="question">
+        <label for="question">Pregunta:</label>
+        <p>Describa el procedimiento de reforma constitucional del artículo 167 CE</p>
+    </div>
+    <div class="answer">
+        <label for="studentAnswer">Tu respuesta:</label>
+        <textarea id="studentAnswer" rows="4" cols="50"></textarea>
+    </div>
+    <button onclick="evaluateAnswer()">Evaluar Respuesta</button>
+    <div id="answersComparison" class="answer-box">
+        <div id="studentResponse"></div>
+        <div id="predefinedResponse" style="display: none;"></div>
+    </div>
+    <button id="retryButton" style="display: none;" onclick="retry()">Volver a intentarlo</button>
+</div>
+
+<!-- Incluir bibliotecas -->
+<script src="https://cdn.jsdelivr.net/npm/compromise@latest/builds/compromise.min.js"></script>
+
+<script>
+    const predefinedAnswer = "Según el artículo 167, Los proyectos de reforma constitucional deberán ser aprobados por una mayoría de tres quintos de cada una de las Cámaras. Si no hubiera acuerdo entre ambas, se intentará obtenerlo mediante la creación de una Comisión de composición paritaria de Diputados y Senadores, que presentará un texto que será votado por el Congreso y el Senado. De no lograrse la aprobación mediante el procedimiento del apartado anterior, y siempre que el texto hubiere obtenido el voto favorable de la mayoría absoluta del Senado, el Congreso, por mayoría de dos tercios, podrá aprobar la reforma. Aprobada la reforma por las Cortes Generales, será sometida a referéndum para su ratificación cuando así lo soliciten, dentro de los quince días siguientes a su aprobación, una décima parte de los miembros de cualquiera de las Cámaras.";
+    let studentAnswer = '';
+
+    function preprocessText(text) {
+        // Conversión a minúsculas
+        text = text.toLowerCase();
+
+        // Eliminación de puntuación
+        text = text.replace(/[^\w\s]/gi, '');
+
+        // Lematización
+        let doc = nlp(text);
+        text = doc.out('normal');
+
+        return text;
+    }
+
+    function evaluateAnswer() {
+        studentAnswer = document.getElementById('studentAnswer').value;
+
+        // Mostrar respuesta del estudiante
+        document.getElementById('studentResponse').innerHTML = `<strong>Tu respuesta:</strong><br>${studentAnswer}`;
+
+        // Mostrar respuesta del profesor (predefinida)
+        document.getElementById('predefinedResponse').innerHTML = `<strong>Respuesta del profesor:</strong><br>${predefinedAnswer}`;
+        document.getElementById('predefinedResponse').style.display = 'block';
+
+        // Mostrar botón de volver a intentarlo
+        document.getElementById('retryButton').style.display = 'block';
+    }
+
+    function retry() {
+        // Ocultar respuesta del profesor y botón de volver a intentarlo
+        document.getElementById('predefinedResponse').style.display = 'none';
+        document.getElementById('retryButton').style.display = 'none';
+
+        // Limpiar respuesta del estudiante
+        document.getElementById('studentAnswer').value = '';
+        document.getElementById('studentResponse').innerHTML = '';
+
+        // Reiniciar variable de respuesta del estudiante
+        studentAnswer = '';
+    }
+</script>
+
+<!-- Botón de navegación añadido al final -->
+<div style="text-align: center; margin-top: 20px;">
+    <a href="test autocorregido con formato.html" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;">Ir a test autocorregido con formato</a>
+</div>
